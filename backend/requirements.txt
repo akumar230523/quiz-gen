@@ -1,0 +1,33 @@
+# Core Flask Framework
+Flask==3.0.3
+Flask-CORS==4.0.1
+Werkzeug==3.0.3
+
+# Database
+flask-pymongo==2.3.0
+pymongo[srv]==4.7.3
+
+# Authentication
+PyJWT==2.8.0
+
+# Environment & Utilities
+python-dotenv==1.0.1
+requests==2.32.3
+
+# AI Services (Optional - for exam generation)
+google-generativeai==0.7.2
+google-cloud-aiplatform>=1.38.0
+google-cloud-vision==3.4.4
+google-cloud-storage==2.10.0
+
+# File Processing
+Pillow==10.4.0
+# PyMuPDF==1.23.8
+# opencv-python
+
+
+
+dnspython==2.6.1
+gunicorn==22.0.0
+motor==3.5.0
+certifi==2024.7.4
