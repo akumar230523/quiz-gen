@@ -1,7 +1,46 @@
+/* =============================================================================
+   QuizGen Global Styles
+   Uses Tailwind utilities + custom CSS for things Tailwind can't do alone.
+   Dark theme is the default; Light theme activates when <html class="light">.
+============================================================================= */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Custom Properties  */
+
+:root {
+    /* Dark theme (default) */
+    --bg: #0a0f1e;
+    --surface: rgba(255, 255, 255, 0.05);
+    --border: rgba(255, 255, 255, 0.10);
+    --border-h: rgba(255, 255, 255, 0.20);
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.50);
+    --text-dim: rgba(255, 255, 255, 0.30);
+    --neon: #00f5d4;
+    --violet: #7c3aed;
+    --grid-line: rgba(255, 255, 255, 0.03);
+
+    /* Scrollbar */
+    --scroll-thumb: rgba(255, 255, 255, 0.20);
+}
+
+/* Light theme overrides — activated by <html class="light"> */
+html.light {
+    --bg: #f1f5f9;
+    --surface: rgba(255, 255, 255, 0.85);
+    --border: rgba(0, 0, 0, 0.08);
+    --border-h: rgba(0, 0, 0, 0.18);
+    --text: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    --grid-line: rgba(0, 0, 0, 0.04);
+    --scroll-thumb: rgba(0, 0, 0, 0.20);
+}
+
+/* ── Base resets ─────────────────────────────────────────────────────────── */
 @layer base {
 
     *,
@@ -16,26 +55,37 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
+    /* Dark body: grid dot texture */
     body {
-        @apply bg-ink text-white font-body;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: 'DM Sans', sans-serif;
         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.03)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+        transition: background-color 0.3s ease, color 0.3s ease;
     }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5 {
-        @apply font-display;
+    /* Light body: clean subtle grid */
+    html.light body {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(0 0 0 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+    }
+
+    h1, h2, h3, h4, h5 {
+        font-family: 'Syne', sans-serif;
     }
 }
 
+/* ── Component classes ───────────────────────────────────────────────────── */
 @layer components {
 
-    /* ── Glass Cards ──────────────────────────────────────── */
+    /* ── Glass Cards ─────────────────────────────────── */
     .glass {
-        @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        background-color: var(--surface);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
     }
 
     .glass-hover {
@@ -43,28 +93,23 @@
     }
 
     .glass-hover:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
+        border-color: var(--border-h);
         transform: translateY(-2px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     }
 
-    .glass-sm {
-        @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl;
-    }
-
-    /* ── Buttons ──────────────────────────────────────────── */
+    /* ── Buttons ─────────────────────────────────────── */
     .btn-primary {
-        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm bg-neon text-ink transition-all duration-200 cursor-pointer;
+        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm bg-neon text-ink transition-all duration-200 cursor-pointer select-none;
     }
 
     .btn-primary:hover {
         background-color: #00d4b8;
-        box-shadow: 0 0 30px rgba(0, 245, 212, 0.3);
+        box-shadow: 0 0 24px rgba(0, 245, 212, 0.30);
     }
 
     .btn-primary:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
     .btn-primary:disabled {
@@ -74,16 +119,18 @@
     }
 
     .btn-secondary {
-        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm bg-white/10 border border-white/20 text-white transition-all duration-200 cursor-pointer;
+        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm transition-all duration-200 cursor-pointer select-none;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
     }
 
     .btn-secondary:hover {
-        background-color: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: var(--border-h);
     }
 
     .btn-secondary:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
     .btn-secondary:disabled {
@@ -93,16 +140,16 @@
     }
 
     .btn-violet {
-        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm bg-violet text-white transition-all duration-200 cursor-pointer;
+        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm bg-violet text-white transition-all duration-200 cursor-pointer select-none;
     }
 
     .btn-violet:hover {
         background-color: #6d28d9;
-        box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
+        box-shadow: 0 0 24px rgba(124, 58, 237, 0.35);
     }
 
     .btn-violet:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
     .btn-violet:disabled {
@@ -112,18 +159,18 @@
     }
 
     .btn-danger {
-        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm border transition-all duration-200 cursor-pointer;
-        background-color: rgba(244, 63, 94, 0.2);
-        border-color: rgba(244, 63, 94, 0.3);
+        @apply inline-flex items-center gap-2 px-6 py-3 rounded-xl font-display font-semibold text-sm transition-all duration-200 cursor-pointer select-none;
+        background-color: rgba(244, 63, 94, 0.15);
+        border: 1px solid rgba(244, 63, 94, 0.30);
         color: #f43f5e;
     }
 
     .btn-danger:hover {
-        background-color: rgba(244, 63, 94, 0.3);
+        background-color: rgba(244, 63, 94, 0.25);
     }
 
     .btn-danger:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
     .btn-danger:disabled {
@@ -133,44 +180,34 @@
     }
 
     .btn-ghost {
-        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-body text-sm text-white/70 transition-all duration-200 cursor-pointer;
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-body text-sm transition-all duration-200 cursor-pointer select-none;
+        color: var(--text-muted);
     }
 
     .btn-ghost:hover {
-        color: white;
-        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text);
+        background-color: var(--surface);
     }
 
     .btn-ghost:active {
-        transform: scale(0.95);
+        transform: scale(0.96);
     }
 
-    .btn-icon {
-        @apply p-2 rounded-lg transition-all duration-200 cursor-pointer;
-    }
-
-    .btn-icon:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .btn-icon:active {
-        transform: scale(0.95);
-    }
-
-    /* ── Form Inputs ──────────────────────────────────────── */
+    /* ── Form inputs ─────────────────────────────────── */
     .input {
-        @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-body text-sm outline-none transition-all duration-200;
-        color-scheme: dark;
+        @apply w-full px-4 py-3 rounded-xl font-body text-sm outline-none transition-all duration-200;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
     }
 
     .input::placeholder {
-        color: rgba(255, 255, 255, 0.3);
+        color: var(--text-dim);
     }
 
     .input:focus {
         border-color: rgba(0, 245, 212, 0.5);
-        background-color: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.10);
     }
 
     .input-error {
@@ -178,129 +215,78 @@
     }
 
     .input-error:focus {
-        box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.1) !important;
+        box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.10) !important;
     }
 
     .label {
         @apply block text-xs font-display font-semibold uppercase tracking-widest mb-2;
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--text-muted);
     }
 
     .select {
-        @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-body text-sm outline-none transition-all duration-200 cursor-pointer appearance-none;
+        @apply w-full px-4 py-3 rounded-xl font-body text-sm outline-none transition-all duration-200 cursor-pointer appearance-none;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
     }
 
     .select:focus {
         border-color: rgba(0, 245, 212, 0.5);
-        box-shadow: 0 0 0 2px rgba(0, 245, 212, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.10);
     }
 
-    /* Make select options dark on Windows */
     .select option {
         background-color: #0a0f1e;
         color: white;
     }
 
-    /* ── Badges ───────────────────────────────────────────── */
+    html.light .select option {
+        background-color: #ffffff;
+        color: #0f172a;
+    }
+
+    /* ── Badges ──────────────────────────────────────── */
     .badge {
         @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-display font-semibold;
     }
 
     .badge-neon {
-        background-color: rgba(0, 245, 212, 0.15);
+        background: rgba(0, 245, 212, 0.12);
         color: #00f5d4;
-        border: 1px solid rgba(0, 245, 212, 0.2);
+        border: 1px solid rgba(0, 245, 212, 0.20);
     }
 
     .badge-violet {
-        background-color: rgba(124, 58, 237, 0.15);
+        background: rgba(124, 58, 237, 0.12);
         color: #b8aaff;
-        border: 1px solid rgba(124, 58, 237, 0.2);
+        border: 1px solid rgba(124, 58, 237, 0.20);
     }
 
     .badge-amber {
-        background-color: rgba(245, 158, 11, 0.15);
+        background: rgba(245, 158, 11, 0.12);
         color: #f59e0b;
-        border: 1px solid rgba(245, 158, 11, 0.2);
+        border: 1px solid rgba(245, 158, 11, 0.20);
     }
 
     .badge-rose {
-        background-color: rgba(244, 63, 94, 0.15);
+        background: rgba(244, 63, 94, 0.12);
         color: #f43f5e;
-        border: 1px solid rgba(244, 63, 94, 0.2);
+        border: 1px solid rgba(244, 63, 94, 0.20);
     }
 
     .badge-emerald {
-        background-color: rgba(16, 185, 129, 0.15);
+        background: rgba(16, 185, 129, 0.12);
         color: #10b981;
-        border: 1px solid rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.20);
     }
 
     .badge-grey {
-        @apply bg-white/10 border border-white/10;
-        color: rgba(255, 255, 255, 0.6);
+        background: var(--surface);
+        color: var(--text-muted);
+        border: 1px solid var(--border);
     }
 
-    /* ── Stat Cards ───────────────────────────────────────── */
-    .stat-card {
-        @apply glass p-5 flex flex-col gap-1;
-    }
-
-    .stat-number {
-        @apply text-3xl font-display font-bold text-white;
-    }
-
-    .stat-label {
-        @apply text-xs font-body uppercase tracking-widest;
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    /* ── Section Headers ──────────────────────────────────── */
-    .section-title {
-        @apply text-2xl font-display font-bold text-white;
-    }
-
-    .section-sub {
-        @apply text-sm font-body mt-1;
-        color: rgba(255, 255, 255, 0.5);
-    }
-
-    /* ── Divider ──────────────────────────────────────────── */
-    .divider {
-        @apply h-px my-6;
-        background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    /* ── Progress Bar ─────────────────────────────────────── */
-    .progress-bar {
-        @apply h-2 rounded-full overflow-hidden;
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .progress-fill {
-        @apply h-full rounded-full bg-neon transition-all duration-500;
-    }
-
-    /* ── Scrollbar ────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 9999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
-    }
-
-    /* ── Page Containers ──────────────────────────────────── */
+    /* ── Page containers ─────────────────────────────── */
     .page {
         @apply min-h-screen px-4 py-8 md:px-8 max-w-7xl mx-auto;
     }
@@ -308,73 +294,80 @@
     .page-center {
         @apply min-h-screen flex items-center justify-center px-4;
     }
+
+    /* ── Divider ─────────────────────────────────────── */
+    .divider {
+        @apply h-px my-6;
+        background-color: var(--border);
+    }
+
+    /* ── Progress bar ────────────────────────────────── */
+    .progress-bar {
+        @apply h-2 rounded-full overflow-hidden;
+        background-color: var(--border);
+    }
+
+    .progress-fill {
+        @apply h-full rounded-full bg-neon transition-all duration-500;
+    }
+
+    /* ── Gradient text helpers ───────────────────────── */
+    .text-gradient-neon {
+        background: linear-gradient(to right, #00f5d4, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-gradient-violet {
+        background: linear-gradient(to right, #b8aaff, #00f5d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .text-gradient-warm {
+        background: linear-gradient(to right, #f59e0b, #f43f5e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* ── Floating orb decoration ─────────────────────── */
+    .orb {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(64px);
+        opacity: 0.18;
+        pointer-events: none;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    /* ── Skeleton shimmer ────────────────────────────── */
+    .shimmer {
+        background: linear-gradient(90deg, var(--surface) 25%, var(--border) 50%, var(--surface) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s linear infinite;
+    }
 }
 
-/* ── Shimmer skeleton ─────────────────────────────────── */
-.shimmer {
-    background: linear-gradient(90deg,
-            rgba(255, 255, 255, 0.03) 25%,
-            rgba(255, 255, 255, 0.08) 50%,
-            rgba(255, 255, 255, 0.03) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 2s linear infinite;
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
 }
 
-/* ── Glow helpers ─────────────────────────────────────── */
-.glow-neon {
-    box-shadow: 0 0 30px rgba(0, 245, 212, 0.3);
+::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.glow-violet {
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
-}
-
-.text-gradient-neon {
-    background: linear-gradient(to right, #00f5d4, #10b981);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.text-gradient-violet {
-    background: linear-gradient(to right, #b8aaff, #00f5d4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.text-gradient-warm {
-    background: linear-gradient(to right, #f59e0b, #f43f5e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* ── Floating orb ─────────────────────────────────────── */
-.orb {
-    position: absolute;
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
     border-radius: 9999px;
-    filter: blur(64px);
-    opacity: 0.2;
-    pointer-events: none;
-    animation: float 6s ease-in-out infinite;
 }
 
-/* ── Form control accents ─────────────────────────────── */
-input[type="radio"]:checked {
-    accent-color: #00f5d4;
-}
-
+/* ── Focus ring accents ──────────────────────────────────────────────────── */
+input[type="radio"]:checked,
 input[type="checkbox"]:checked {
     accent-color: #00f5d4;
-}
-
-/* ── badge inline-flex fix ──────────────────────── */
-.badge-neon,
-.badge-violet,
-.badge-amber,
-.badge-rose,
-.badge-emerald,
-.badge-grey {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-display font-semibold;
 }

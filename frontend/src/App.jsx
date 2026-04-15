@@ -1,4 +1,3 @@
-// FILE: frontend/src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import Spinner from '@/components/common/Spinner';
@@ -23,6 +22,9 @@ import AdaptiveQuiz from '@/pages/Exam/AdaptiveQuiz';
 // Practice
 import Practice from '@/pages/Practice/Practice';
 import PracticeSession from '@/pages/Practice/PracticeSession';
+
+// Offline Quiz 
+import OfflineQuiz from '@/pages/Offline/OfflineQuiz';
 
 // AI Features
 import AITutor from '@/pages/Tutor/AITutor';
@@ -55,7 +57,6 @@ function GuestOnly({ children }) {
     return !isAuth ? children : <Navigate to="/dashboard" replace />;
 }
 
-// Only institute role can access these
 function InstituteGuard({ children }) {
     const { user, isAuth, loading } = useAuth();
     if (loading) return <Loading />;
@@ -72,26 +73,27 @@ export default function App() {
             <Route path="/login" element={<GuestOnly><Login /></GuestOnly>} />
             <Route path="/register" element={<GuestOnly><Register /></GuestOnly>} />
 
-            {/* ── Exam attempt — no login needed ───── */}
-            <Route path="/exam/:examId" element={<ExamAttempt />} />
-            <Route path="/exam/report/:reportId" element={<ExamReport />} />
-
-            {/* ── Authenticated (any role) ────────── */}
             <Route path="/dashboard" element={<Guard><Dashboard /></Guard>} />
             <Route path="/countries" element={<Guard><Countries /></Guard>} />
             <Route path="/exams/:countryId" element={<Guard><Exams /></Guard>} />
             <Route path="/profile" element={<Guard><Profile /></Guard>} />
+
+            <Route path="/exam/:examId" element={<ExamAttempt />} />
+            <Route path="/exam/report/:reportId" element={<ExamReport />} />
+            <Route path="/student/exams" element={<Guard><StudentExams /></Guard>} />
+
             <Route path="/test/:examId" element={<Guard><OnlineTest /></Guard>} />
             <Route path="/report/:resultId" element={<Guard><TestReport /></Guard>} />
             <Route path="/adaptive" element={<Guard><AdaptiveQuiz /></Guard>} />
+
             <Route path="/practice" element={<Guard><Practice /></Guard>} />
             <Route path="/practice/session" element={<Guard><PracticeSession /></Guard>} />
+
             <Route path="/tutor" element={<Guard><AITutor /></Guard>} />
             <Route path="/performance" element={<Guard><PerformanceHub /></Guard>} />
             <Route path="/recommendations" element={<Guard><Recommendations /></Guard>} />
-            <Route path="/student/exams" element={<Guard><StudentExams /></Guard>} />
+            <Route path="/offline" element={<Guard><OfflineQuiz /></Guard>} />
 
-            {/* ── Institute only ─────────────────── */}
             <Route path="/institute/create" element={<InstituteGuard><CreateExam /></InstituteGuard>} />
             <Route path="/institute/exams" element={<InstituteGuard><MyExams /></InstituteGuard>} />
             <Route path="/institute/analytics" element={<InstituteGuard><Analytics /></InstituteGuard>} />

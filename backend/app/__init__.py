@@ -1,26 +1,42 @@
 """
-QuizGen Platform – Flask Application Factory
+QuizGen Platform — Flask Application Factory
+FILE : app/__init__.py
+
+create_app() is the single entry-point that:
+  1. Initialises logging (must be first so everything else can log)
+  2. Creates the Flask instance
+  3. Loads configuration
+  4. Wires up CORS, database, and all route blueprints
+  5. Registers global error handlers
 """
 
+import logging
 import os
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-# ── Use RELATIVE imports (fixes Windows ImportError) ──────────
-from .config import Config
+from .config.settings import Config
 from .models.database import configure_database, init_db
+from .utils.logger import setup_logging
+
+logger = logging.getLogger(__name__)
 
 
-def create_app(config_class=Config) -> Flask:
+def create_app(config_class: type = Config) -> Flask:
+    """Factory function — returns a fully configured Flask app."""
+
+    # ── Logging must be first — everything after this can use logger ──────
+    setup_logging()
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # ── Warn about missing config ────────────────────────────
-    warnings = config_class.validate()
-    for w in warnings:
-        print(f"[CONFIG] ⚠️  {w}")
+    # ── Print any configuration warnings at startup ───────────────────────
+    for warning in config_class.validate():
+        logger.warning("[CONFIG] %s", warning)
 
-    # ── CORS ─────────────────────────────────────────────────
+    # ── CORS ──────────────────────────────────────────────────────────────
     CORS(app, resources={
         r"/*": {
             "origins": [
@@ -28,24 +44,25 @@ def create_app(config_class=Config) -> Flask:
                 "http://localhost:3000",
                 "http://localhost:5173",
             ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "methods":       ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True,
         }
     })
 
-    # ── Database ─────────────────────────────────────────────
+    # ── Database ──────────────────────────────────────────────────────────
     configure_database(app)
     with app.app_context():
         init_db()
 
-    # ── Blueprints ───────────────────────────────────────────
-    from .routes.auth      import auth_bp
-    from .routes.quiz      import quiz_bp
-    from .routes.institute import institute_bp
-    from .routes.student   import student_bp
-    from .routes.practice  import practice_bp
-    from .routes.tutor     import tutor_bp
+    # ── Route Blueprints ──────────────────────────────────────────────────
+    from .routes.auth_routes      import auth_bp
+    from .routes.quiz_routes      import quiz_bp
+    from .routes.institute_routes import institute_bp
+    from .routes.student_routes   import student_bp
+    from .routes.practice_routes  import practice_bp
+    from .routes.tutor_routes     import tutor_bp
+    from .routes.offline_routes   import offline_bp
 
     app.register_blueprint(auth_bp,      url_prefix="/auth")
     app.register_blueprint(quiz_bp,      url_prefix="/quiz")
@@ -53,54 +70,55 @@ def create_app(config_class=Config) -> Flask:
     app.register_blueprint(student_bp,   url_prefix="/student")
     app.register_blueprint(practice_bp,  url_prefix="/practice")
     app.register_blueprint(tutor_bp,     url_prefix="/tutor")
+    app.register_blueprint(offline_bp,   url_prefix="/offline")
 
-    # ── Health Check ─────────────────────────────────────────
+    # ── Health check endpoint ─────────────────────────────────────────────
     @app.route("/health")
     def health():
-        import os
-        key = os.getenv("GEMINI_API_KEY", "").strip()
-        creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-        project = os.getenv("GCLOUD_PROJECT_ID", "").strip()
-        creds_ok = bool(creds and os.path.isfile(creds))
-        use_vertex = os.getenv("GEMINI_USE_VERTEX", "").lower() in ("1", "true", "yes")
-        if use_vertex or (not key and project and creds_ok):
-            mode = "vertex"
-        elif key:
-            mode = "api_key"
-        else:
-            mode = "none"
+        api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+        model   = os.getenv("OPENROUTER_MODEL", "not set").strip()
         return jsonify({
-            "status":  "healthy",
-            "service": "QuizGen API",
-            "version": "2.0.0",
-            "ai_mode": mode,
-            "gemini_configured": mode != "none",
-            "gemini_model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
-            "vertex_model": os.getenv("GEMINI_VERTEX_MODEL") or os.getenv("GEMINI_MODEL", "gemini-1.5-flash-001"),
-            "gcp_credentials_file_set": creds_ok,
+            "status":                "healthy",
+            "service":               "QuizGen API",
+            "version":               "3.0.0",
+            "ai_provider":           "openrouter",
+            "openrouter_configured": bool(api_key),
+            "model":                 model,
+            "endpoints": {
+                "auth":      "/auth",
+                "quiz":      "/quiz",
+                "institute": "/institute",
+                "student":   "/student",
+                "practice":  "/practice",
+                "tutor":     "/tutor",
+            },
         }), 200
 
     @app.route("/")
     def root():
         return jsonify({
             "name":    "QuizGen Platform API",
-            "version": "2.0.0",
-            "docs":    "/health",
+            "version": "3.0.0",
+            "health":  "/health",
         }), 200
 
-    # ── Global Error Handlers ────────────────────────────────
+    # ── Global error handlers ─────────────────────────────────────────────
     @app.errorhandler(404)
-    def not_found(e):
-        return jsonify({"message": "Route not found"}), 404
+    def not_found(_e):
+        return jsonify({"success": False, "error": "Route not found"}), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(_e):
+        return jsonify({"success": False, "error": "Method not allowed"}), 405
 
     @app.errorhandler(500)
-    def server_error(e):
-        return jsonify({"message": "Internal server error"}), 500
+    def server_error(_e):
+        return jsonify({"success": False, "error": "Internal server error"}), 500
 
     @app.errorhandler(Exception)
-    def unhandled(e):
-        import traceback
-        traceback.print_exc()
-        return jsonify({"message": str(e)}), 500
+    def unhandled(exc):
+        logger.exception("Unhandled exception: %s", exc)
+        return jsonify({"success": False, "error": str(exc)}), 500
 
+    logger.info("QuizGen API v3.0.0 ready")
     return app

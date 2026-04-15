@@ -1,8 +1,23 @@
-// ── Spinner ────────────────────────────────────────────────────
+/**
+ * Spinner.jsx  ─  Loading indicator
+ *
+ * Props:
+ *   size   "sm" | "md" | "lg"  (default: "md")
+ *   color  "neon" | "white" | "violet"  (default: "neon")
+*/
+
 export default function Spinner({ size = 'md', color = 'neon' }) {
-    const sz = { sm: 'w-4 h-4', md: 'w-8 h-8', lg: 'w-14 h-14' }[size];
-    const col = color === 'neon' ? 'border-neon' : color === 'violet' ? 'border-violet-400' : 'border-white';
+    const sizes = { sm: 'w-4 h-4 border-2', md: 'w-7 h-7 border-2', lg: 'w-12 h-12 border-[3px]' };
+    const colors = {
+        neon: 'border-neon border-t-transparent',
+        white: 'border-white border-t-transparent',
+        violet: 'border-violet border-t-transparent',
+    };
     return (
-        <div className={`${sz} rounded-full border-2 border-white/10 ${col} border-t-transparent animate-spin`} />
+        <div
+            role="status"
+            aria-label="Loading"
+            className={`${sizes[size]} ${colors[color]} rounded-full animate-spin`}
+        />
     );
 }
